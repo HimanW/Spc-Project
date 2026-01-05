@@ -1,0 +1,17 @@
+﻿# Build output
+[Bb]in/
+[Oo]bj/
+
+# Visual Studio / Rider
+.vs/
+.idea/
+*.suo
+*.user
+
+# Local DB
+*.db
+*.db-shm
+*.db-wal
+
+# Local secrets (recommended)
+appsettings.Development.json

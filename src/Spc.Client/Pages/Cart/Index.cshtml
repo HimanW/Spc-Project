@@ -1,0 +1,266 @@
+@page
+@model Spc.Client.Pages.Cart.IndexModel
+@{ ViewData["Title"] = "Shopping Cart"; }
+
+<style>
+    .cart-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.25rem;
+    }
+
+    .cart-header h2 {
+        margin-bottom: 0;
+        font-size: 1.5rem;
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        font-weight: 600;
+    }
+
+    .status-badge.logged-in {
+        background: #d1fae5;
+        color: #065f46;
+    }
+
+    .status-badge.not-logged-in {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .cart-card {
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        border-radius: 0.75rem;
+        overflow-x: auto;
+        margin-bottom: 1.25rem;
+        max-height: calc(100vh - 400px);
+        overflow-y: auto;
+    }
+
+    .cart-table {
+        width: 100%;
+        min-width: 500px;
+    }
+
+    .cart-table thead {
+        background: var(--bg);
+        position: sticky;
+        top: 0;
+        z-index: 1;
+    }
+
+    .cart-table th {
+        padding: 0.75rem 1.25rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.5px;
+        color: var(--text-light);
+    }
+
+    .cart-table td {
+        padding: 1rem 1.25rem;
+        border-top: 1px solid var(--border);
+    }
+
+    .cart-table .drug-name {
+        font-weight: 600;
+        color: var(--text);
+    }
+
+    .cart-table .price {
+        color: var(--text-light);
+    }
+
+    .cart-table .total-price {
+        font-weight: 600;
+        color: var(--primary);
+        font-size: 1.1rem;
+    }
+
+    .cart-table .cart-total-row {
+        background: var(--bg);
+        font-weight: 700;
+        position: sticky;
+        bottom: 0;
+        z-index: 1;
+    }
+
+    .cart-table .cart-total-row td {
+        border-top: 2px solid var(--border);
+        padding: 1rem 1.25rem;
+        font-size: 1.1rem;
+    }
+
+    .order-section {
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+    }
+
+    .order-section h3 {
+        font-size: 1.15rem;
+        margin-bottom: 1rem;
+    }
+
+    .order-form {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .submit-order-btn {
+        padding: 0.75rem;
+        font-size: 1rem;
+        font-weight: 600;
+    }
+
+    .empty-cart {
+        text-align: center;
+        padding: 3rem 2rem;
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        border-radius: 0.75rem;
+    }
+
+    .empty-cart-icon {
+        font-size: 3.5rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .empty-cart h3 {
+        margin-bottom: 0.5rem;
+        font-size: 1.25rem;
+    }
+
+    .empty-cart p {
+        color: var(--text-light);
+        margin-bottom: 1.5rem;
+    }
+
+    @@media (max-width: 768px) {
+        .cart-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .cart-table {
+            font-size: 0.85rem;
+        }
+
+        .cart-table th,
+        .cart-table td {
+            padding: 0.75rem 0.5rem;
+        }
+
+        .cart-table .cart-total-row td {
+            padding: 1rem 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .drug-name {
+            font-size: 0.9rem;
+        }
+
+        .total-price {
+            font-size: 1rem;
+        }
+
+        .order-section {
+            padding: 1.5rem;
+        }
+
+        .empty-cart {
+            padding: 2rem 1rem;
+        }
+
+        .empty-cart-icon {
+            font-size: 3rem;
+        }
+    }
+</style>
+
+<div class="cart-header">
+    <h2>Shopping Cart</h2>
+    @if(!string.IsNullOrEmpty(Model.PharmacyId))
+    {
+        <span class="status-badge logged-in">✓ Logged In</span>
+    }
+    else
+    {
+        <span class="status-badge not-logged-in">⚠ Not Logged In</span>
+    }
+</div>
+
+@if(Model.Success != null) 
+{ 
+    <div class="alert alert-success mb-3">
+        <strong>@Model.Success</strong><br/>
+        <a href="/Orders/Details?orderId=@Model.CreatedOrderId">View Order Details →</a>
+    </div> 
+}
+
+@if(Model.Error != null) 
+{ 
+    <div class="alert alert-danger mb-3">@Model.Error</div> 
+}
+
+@if(Model.Items.Any())
+{
+    <div class="cart-card">
+        <table class="cart-table">
+            <thead>
+                <tr>
+                    <th>Drug</th>
+                    <th>Price</th>
+                    <th>Quantity</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach(var item in Model.Items)
+                {
+                    <tr>
+                        <td class="drug-name">@item.DrugName</td>
+                        <td class="price">LKR @item.UnitPrice.ToString("N2")</td>
+                        <td>@item.Quantity</td>
+                        <td class="total-price">LKR @((item.UnitPrice * item.Quantity).ToString("N2"))</td>
+                    </tr>
+                }
+                <tr class="cart-total-row">
+                    <td colspan="3">Total Amount</td>
+                    <td>LKR @Model.Total.ToString("N2")</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="order-section">
+        <h3>Complete Your Order</h3>
+        <form method="post" class="order-form">
+            <div class="form-group">
+                <label for="Notes">Order Notes (Optional)</label>
+                <textarea asp-for="Notes" class="form-control" rows="3" placeholder="Add any special instructions..."></textarea>
+            </div>
+            <button type="submit" class="btn btn-success submit-order-btn">Place Order</button>
+        </form>
+    </div>
+}
+else
+{
+    <div class="empty-cart">
+        <div class="empty-cart-icon">🛒</div>
+        <h3>Your cart is empty</h3>
+        <p>Add some drugs to your cart to get started</p>
+        <a href="/Drugs/Index" class="btn btn-primary">Browse Drugs</a>
+    </div>
+}

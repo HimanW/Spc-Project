@@ -1,0 +1,228 @@
+@page
+@model Spc.Client.Pages.Drugs.IndexModel
+@{ ViewData["Title"] = "Browse Drugs"; }
+
+<style>
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.25rem;
+    }
+
+    .page-header h2 {
+        margin-bottom: 0;
+        font-size: 1.5rem;
+    }
+
+    .search-section {
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        border-radius: 0.75rem;
+        padding: 1.25rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .search-form {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .search-input {
+        flex: 1;
+    }
+
+    .drugs-table {
+        background: var(--card-bg);
+        border-radius: 0.75rem;
+        overflow-x: auto;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        max-height: calc(100vh - 320px);
+        overflow-y: auto;
+    }
+
+    .table {
+        margin-bottom: 0;
+        min-width: 600px;
+    }
+
+    .table thead {
+        background: var(--bg);
+    }
+
+    .table th {
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.5px;
+        color: var(--text-light);
+        white-space: nowrap;
+        padding: 0.75rem 1rem;
+        position: sticky;
+        top: 0;
+        background: var(--bg);
+        z-index: 1;
+    }
+
+    .table td {
+        padding: 0.75rem 1rem;
+    }
+
+    .drug-code {
+        font-family: 'Courier New', monospace;
+        font-size: 0.9rem;
+        color: var(--text-light);
+    }
+
+    .drug-category {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        background: var(--bg);
+        border-radius: 0.375rem;
+        font-size: 0.85rem;
+        color: var(--text-light);
+    }
+
+    .price {
+        font-weight: 600;
+        color: var(--primary);
+        font-size: 1.1rem;
+    }
+
+    .add-to-cart-form {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+    }
+
+    .qty-input {
+        width: 70px;
+        padding: 0.5rem;
+    }
+
+    .add-btn {
+        padding: 0.5rem 1rem;
+        white-space: nowrap;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem 2rem;
+        color: var(--text-light);
+    }
+
+    .empty-state-icon {
+        font-size: 3rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .empty-state h3 {
+        font-size: 1.25rem;
+        margin-bottom: 0.5rem;
+    }
+
+    @@media (max-width: 768px) {
+        .search-form {
+            flex-direction: column;
+        }
+
+        .page-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .add-to-cart-form {
+            flex-direction: column;
+            width: 100%;
+        }
+
+        .qty-input {
+            width: 100%;
+        }
+
+        .add-btn {
+            width: 100%;
+        }
+
+        .table {
+            font-size: 0.85rem;
+        }
+
+        .table th, .table td {
+            padding: 0.75rem 0.5rem;
+        }
+
+        .drug-code {
+            font-size: 0.8rem;
+        }
+
+        .price {
+            font-size: 1rem;
+        }
+    }
+</style>
+
+<div class="page-header">
+    <h2>Browse Drugs</h2>
+    <a href="/Cart/Index" class="btn btn-warning">
+        🛒 View Cart
+    </a>
+</div>
+
+<div class="search-section">
+    <form method="get" class="search-form">
+        <input name="query" value="@Model.Query" class="form-control search-input" placeholder="Search by drug name..." />
+        <button type="submit" class="btn btn-primary">Search</button>
+    </form>
+</div>
+
+@if(Model.Message != null) 
+{ 
+    <div class="alert alert-info mb-3">@Model.Message</div> 
+}
+
+@if (Model.Result != null && Model.Result.Items.Any())
+{
+    <div class="drugs-table">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Code</th>
+                    <th>Name</th>
+                    <th>Category</th>
+                    <th>Price</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var drug in Model.Result.Items)
+                {
+                    <tr>
+                        <td><span class="drug-code">@drug.Code</span></td>
+                        <td><strong>@drug.Name</strong></td>
+                        <td><span class="drug-category">@drug.Category</span></td>
+                        <td><span class="price">LKR @drug.UnitPrice.ToString("N2")</span></td>
+                        <td>
+                            <form method="post" class="add-to-cart-form">
+                                <input type="hidden" name="drugId" value="@drug.DrugId" />
+                                <input type="hidden" name="drugName" value="@drug.Name" />
+                                <input type="hidden" name="unitPrice" value="@drug.UnitPrice" />
+                                <input name="qty" value="1" class="form-control qty-input" type="number" min="1" />
+                                <button type="submit" class="btn btn-sm btn-primary add-btn">Add to Cart</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+else
+{
+    <div class="empty-state">
+        <div class="empty-state-icon">💊</div>
+        <h3>No drugs found</h3>
+        <p>Try adjusting your search criteria</p>
+    </div>
+}

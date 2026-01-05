@@ -1,0 +1,136 @@
+@page
+@model Spc.Client.Pages.Pharmacies.CreateModel
+@{ ViewData["Title"] = "Register Pharmacy"; }
+
+<style>
+    .registration-container {
+        max-width: 500px;
+        margin: 0 auto;
+    }
+
+    .form-card {
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        border-radius: 1rem;
+        padding: 2rem;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    }
+
+    .form-header {
+        text-align: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .form-header h2 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 0.25rem;
+    }
+
+    .form-header p {
+        color: var(--text-light);
+        font-size: 0.9rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.25rem;
+    }
+
+    .form-group label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: var(--text);
+    }
+
+    .form-control {
+        width: 100%;
+    }
+
+    .submit-btn {
+        width: 100%;
+        padding: 0.75rem;
+        font-size: 1rem;
+        font-weight: 600;
+        margin-top: 0.5rem;
+    }
+
+    .success-message {
+        margin-top: 1.25rem;
+        padding: 1rem;
+        background: #d1fae5;
+        border: 1px solid #10b981;
+        border-radius: 0.75rem;
+        text-align: center;
+    }
+
+    .success-message p {
+        color: #065f46;
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+    }
+
+    .success-message a {
+        color: var(--primary);
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+    .success-message a:hover {
+        text-decoration: underline;
+    }
+
+    @@media (max-width: 768px) {
+        .registration-container {
+            margin: 1rem auto;
+        }
+
+        .form-card {
+            padding: 1.5rem;
+        }
+
+        .form-header h2 {
+            font-size: 1.5rem;
+        }
+
+        .form-header p {
+            font-size: 0.9rem;
+        }
+    }
+</style>
+
+<div class="registration-container">
+    <div class="form-card">
+        <div class="form-header">
+            <h2>Register Your Pharmacy</h2>
+            <p>Enter your pharmacy details to get started</p>
+        </div>
+
+        <form method="post">
+            <div class="form-group">
+                <label for="Name">Pharmacy Name</label>
+                <input asp-for="Name" class="form-control" placeholder="Enter pharmacy name" required />
+            </div>
+
+            <div class="form-group">
+                <label for="RegNo">Registration Number</label>
+                <input asp-for="RegNo" class="form-control" placeholder="e.g., REG-001" required />
+            </div>
+
+            <div class="form-group">
+                <label for="Address">Address</label>
+                <input asp-for="Address" class="form-control" placeholder="Enter full address" required />
+            </div>
+
+            <button type="submit" class="btn btn-primary submit-btn">Register Pharmacy</button>
+        </form>
+
+        @if (!string.IsNullOrWhiteSpace(Model.CreatedMessage))
+        {
+            <div class="success-message">
+                <p>✓ Pharmacy registered successfully!</p>
+                <a href="/Drugs/Index">Start browsing drugs →</a>
+            </div>
+        }
+    </div>
+</div>
