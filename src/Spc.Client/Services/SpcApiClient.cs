@@ -1,5 +1,7 @@
 using System.Net.Http.Json;
 using Microsoft.Extensions.Options;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Spc.Client.Services;
 
@@ -7,6 +9,12 @@ public sealed class SpcApiClient
 {
     private readonly HttpClient _http;
     private readonly ApiOptions _opt;
+
+    private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web)
+    {
+        Converters = { new JsonStringEnumConverter() }
+    };
+
 
     public SpcApiClient(HttpClient http, IOptions<ApiOptions> opt)
     {
@@ -29,7 +37,7 @@ public sealed class SpcApiClient
         // Handle potential null response or errors gracefully in production
         try 
         {
-            var res = await _http.GetFromJsonAsync<PagedResult<DrugDto>>(url, ct);
+            var res = await _http.GetFromJsonAsync<PagedResult<DrugDto>>(url, JsonOptions, ct);
             return res ?? new PagedResult<DrugDto> { Items = new List<DrugDto>(), Page = page, PageSize = pageSize, Total = 0 };
         }
         catch
@@ -40,11 +48,27 @@ public sealed class SpcApiClient
 
     // -------- PHARMACY ----------
     public async Task<PharmacyDto> CreatePharmacyAsync(CreatePharmacyRequest req, CancellationToken ct)
+{
+    var resp = await _http.PostAsJsonAsync(Url("/api/v1/pharmacies"), req, ct);
+
+    if (resp.IsSuccessStatusCode)
     {
-        var resp = await _http.PostAsJsonAsync(Url("/api/v1/pharmacies"), req, ct);
-        resp.EnsureSuccessStatusCode();
-        return (await resp.Content.ReadFromJsonAsync<PharmacyDto>(cancellationToken: ct))!;
+        return (await resp.Content.ReadFromJsonAsync<PharmacyDto>(JsonOptions, ct))!;
     }
+
+    // Read error message returned by your API middleware:
+    // { error: "...", status: 409, path: "/api/v1/pharmacies" }
+    ApiError? apiErr = null;
+    try
+    {
+        apiErr = await resp.Content.ReadFromJsonAsync<ApiError>(cancellationToken: ct);
+    }
+    catch { /* ignore parse errors */ }
+
+    var msg = apiErr?.Error ?? $"API Error: {(int)resp.StatusCode} {resp.ReasonPhrase}";
+    throw new ApiException((int)resp.StatusCode, msg);
+}
+
 
     // -------- ORDERS ----------
     public async Task<OrderDto> CreateOrderAsync(CreateOrderRequest req, CancellationToken ct)
@@ -63,9 +87,12 @@ public sealed class SpcApiClient
 
     public async Task CancelOrderAsync(Guid orderId, CancellationToken ct)
     {
-        // Status 5 = CANCELLED
-        var resp = await _http.PatchAsJsonAsync(Url($"/api/v1/orders/{orderId}/status"),
-            new UpdateOrderStatusRequest { Status = 5 }, ct);
+        var resp = await _http.PatchAsJsonAsync(
+            Url($"/api/v1/orders/{orderId}/status"),
+            new UpdateOrderStatusRequest { Status = "CANCELLED" }, // ✅ string
+            ct);
+
         resp.EnsureSuccessStatusCode();
     }
+
 }
