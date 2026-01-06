@@ -214,13 +214,14 @@
                 <span class="meta-label">Status</span>
                 <span class="meta-value">
                     @{
-                        var status = (Spc.Client.Services.OrderStatus)Model.Order.Status;
-                        var statusClass = status switch {
-                            Spc.Client.Services.OrderStatus.PLACED => "status-placed",
-                            Spc.Client.Services.OrderStatus.APPROVED => "status-approved",
-                            Spc.Client.Services.OrderStatus.DISPATCHED => "status-dispatched",
-                            Spc.Client.Services.OrderStatus.DELIVERED => "status-delivered",
-                            Spc.Client.Services.OrderStatus.CANCELLED => "status-cancelled",
+                        var status = Model.Order.Status ?? "";
+                        var statusClass = status switch
+                        {
+                            "PLACED" => "status-placed",
+                            "APPROVED" => "status-approved",
+                            "DISPATCHED" => "status-dispatched",
+                            "DELIVERED" => "status-delivered",
+                            "CANCELLED" => "status-cancelled",
                             _ => ""
                         };
                     }
@@ -253,7 +254,7 @@
         </ul>
     </div>
 
-    @if(Model.Order.Status == 1)
+    @if(Model.Order.Status == "PLACED" || Model.Order.Status == "APPROVED")
     {
         <div class="cancel-section">
             <p style="margin-bottom: 1rem; color: var(--text-light);">Need to cancel this order?</p>

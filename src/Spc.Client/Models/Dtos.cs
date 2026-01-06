@@ -21,7 +21,7 @@ public sealed class DrugDto
 public sealed class CreatePharmacyRequest
 {
     public required string Name { get; init; }
-    public required int Type { get; init; }   // 1=SPC, 2=DEALER
+    public required string Type { get; init; } 
     public required string RegNo { get; init; }
     public required string Address { get; init; }
 }
@@ -30,7 +30,7 @@ public sealed class PharmacyDto
 {
     public required Guid PharmacyId { get; init; }
     public required string Name { get; init; }
-    public required int Type { get; init; }
+    public required string Type { get; init; }   // ✅ WAS int
     public required string RegNo { get; init; }
     public required string Address { get; init; }
 }
@@ -60,7 +60,7 @@ public sealed class OrderDto
 {
     public required Guid OrderId { get; init; }
     public required Guid PharmacyId { get; init; }
-    public required int Status { get; init; }
+    public required string Status { get; init; }   // ✅ WAS int
     public required DateTime CreatedAtUtc { get; init; }
     public string? Notes { get; init; }
     public required List<OrderItemDto> Items { get; init; }
@@ -69,7 +69,7 @@ public sealed class OrderDto
 
 public sealed class UpdateOrderStatusRequest
 {
-    public required int Status { get; init; } 
+    public required string Status { get; init; }   // ✅ WAS int
 }
 
 public enum OrderStatus
